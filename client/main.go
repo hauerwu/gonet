@@ -35,7 +35,7 @@ func main(){
 	err = sender.SendCmd(cmd)
 	CheckError(err)
 
-	sender.Close()
+	//sender.Close()
 
 	os.Exit(0)
 }
