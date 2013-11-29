@@ -5,6 +5,7 @@ import(
 	"os"
 	"strconv"
 	"test/net_util"
+	"proto/example"
 )
 
 
@@ -16,6 +17,10 @@ func CheckError(err error){
 }
 
 func main(){
+	test := example.Test{}
+
+	_ = test
+
 	if len(os.Args) < 4{
 		fmt.Printf("usage:%s ip port cmd\n",os.Args[0])
 		os.Exit(1)
@@ -38,6 +43,7 @@ func main(){
 	sender.Close()
 
 	os.Exit(0)
+
 }
 
 
