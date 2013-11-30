@@ -31,14 +31,12 @@ func (s *Sender)Connect() error{
 	return err
 }
 
-func (s *Sender)SendCmd(cmd string) error{
+func (s *Sender)SendData(data []byte) error{
 	if s.Conn == nil{
 		return &senderError{}
 	}
 	
-	buff := []byte(cmd)
-	
-	len,err := s.Conn.Write(buff)
+	len,err := s.Conn.Write(data)
 
 	fmt.Printf("send %d bytes, return %s\n",len,err)
 
