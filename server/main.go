@@ -19,31 +19,18 @@ func CheckError(err error){
 	}
 }
 
-func ParseBuff(buff []byte) (int32,[]byte){
-	l := int32(buff[0])
-	if l != int32(len(buff) - 1){
-		return -1,buff
-	}
-	
-	if l == 0{
-		return 0,buff
-	}else{
-		return l,buff[1:]
-	}
-}
 
 func Handle(buff []byte) error{
-	l,b := ParseBuff(buff)
-	if l <= 0{
-		return nil
+
+	test := example.Test{}
+	e := proto.Unmarshal(buff,&test)
+	if e != nil{
+		//fmt.Printf("decode failed,due to:%s\n",e.Error())
+		//return e
 	}
 
-	fmt.Println(b)
-	test := example.Test{}
-	proto.Unmarshal(b,&test)
-
+	fmt.Printf("%s %d\n",test.GetLabel(),test.GetType())
 	fmt.Println(test)
-	//fmt.Printf("%s %d\n",test.GetLabel(),test.GetType())
 	return nil
 }
 
@@ -56,7 +43,7 @@ func main() {
 
 	port,err := strconv.Atoi(port_str)
 	
-	l := net_util.NewListener(ip,port,"tcp")
+	l := net_util.NewListener(ip,port,"tcp",1024)
 
 	err = l.Listen()
 	CheckError(err)

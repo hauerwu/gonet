@@ -35,29 +35,24 @@ func main(){
 	err = sender.Connect()
 	CheckError(err)
 
-	test := example.Test{}
-	test.Label = new(string)
-	*test.Label = "test"
-	test.Type = new(int32)
-	*test.Type = 6
-	test.Reps = []int64{1,2,3,4}
-	test.Optionalgroup = &example.Test_OptionalGroup{}
-	test.Optionalgroup.RequiredField = new(string)
-	*test.Optionalgroup.RequiredField = "opt"
-
-	data,err := proto.Marshal(&test)
-	buff := make([]byte,len(data)+1,len(data)+1)
-
-	buff[0] = byte(len(data))
-	copy(buff[1:],data)
 	
+	test := &example.Test {
+			Label: proto.String("hello"),
+			Type:  proto.Int32(17),
+			Optionalgroup: &example.Test_OptionalGroup {
+				RequiredField: proto.String("good bye"),
+			},
+	}
+
+	data,err := proto.Marshal(test)
+	buff := net_util.Pack2Buff(data)
+	fmt.Println(buff)
 	err = sender.SendData(buff)
 	CheckError(err)
 
 	sender.Close()
 
 	os.Exit(0)
-
 }
 
 
