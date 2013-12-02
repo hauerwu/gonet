@@ -38,7 +38,7 @@ func (s *Sender)SendData(data []byte) error{
 	
 	len,err := s.Conn.Write(data)
 
-	fmt.Printf("send %d bytes, return %s\n",len,err)
+	fmt.Printf("send %d bytes\n",len)
 
 	return err
 }

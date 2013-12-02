@@ -44,11 +44,10 @@ func (x *FOO) UnmarshalJSON(data []byte) error {
 }
 
 type Test struct {
-	Label            *string             `protobuf:"bytes,1,req,name=label" json:"label,omitempty"`
-	Type             *int32              `protobuf:"varint,2,opt,name=type,def=77" json:"type,omitempty"`
-	Reps             []int64             `protobuf:"varint,3,rep,name=reps" json:"reps,omitempty"`
-	Optionalgroup    *Test_OptionalGroup `protobuf:"group,4,opt,name=OptionalGroup" json:"optionalgroup,omitempty"`
-	XXX_unrecognized []byte              `json:"-"`
+	Label            *string `protobuf:"bytes,1,req,name=label" json:"label,omitempty"`
+	Type             *int32  `protobuf:"varint,2,opt,name=type,def=77" json:"type,omitempty"`
+	Reps             []int64 `protobuf:"varint,3,rep,name=reps" json:"reps,omitempty"`
+	XXX_unrecognized []byte  `json:"-"`
 }
 
 func (m *Test) Reset()         { *m = Test{} }
@@ -76,29 +75,6 @@ func (m *Test) GetReps() []int64 {
 		return m.Reps
 	}
 	return nil
-}
-
-func (m *Test) GetOptionalgroup() *Test_OptionalGroup {
-	if m != nil {
-		return m.Optionalgroup
-	}
-	return nil
-}
-
-type Test_OptionalGroup struct {
-	RequiredField    *string `protobuf:"bytes,5,req" json:"RequiredField,omitempty"`
-	XXX_unrecognized []byte  `json:"-"`
-}
-
-func (m *Test_OptionalGroup) Reset()         { *m = Test_OptionalGroup{} }
-func (m *Test_OptionalGroup) String() string { return proto.CompactTextString(m) }
-func (*Test_OptionalGroup) ProtoMessage()    {}
-
-func (m *Test_OptionalGroup) GetRequiredField() string {
-	if m != nil && m.RequiredField != nil {
-		return *m.RequiredField
-	}
-	return ""
 }
 
 func init() {

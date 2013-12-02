@@ -22,11 +22,12 @@ func CheckError(err error){
 
 func Handle(buff []byte) error{
 
+	fmt.Println(buff)
 	test := example.Test{}
 	e := proto.Unmarshal(buff,&test)
 	if e != nil{
-		//fmt.Printf("decode failed,due to:%s\n",e.Error())
-		//return e
+		fmt.Printf("decode failed,due to:%s\n",e.Error())
+		return e
 	}
 
 	fmt.Printf("%s %d\n",test.GetLabel(),test.GetType())

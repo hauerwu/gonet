@@ -97,7 +97,7 @@ func (l *Listener)Run(handle func([]byte) error) {
 					break
 				}
 
-				handle(temp)
+				handle(temp[0:l])
 			}
 			conn.Close()
 
