@@ -10,6 +10,7 @@ import (
 	"os"
 	"fmt"
 	"strconv"
+	"errors"
 	"proto/example"
 	"code.google.com/p/goprotobuf/proto"
 )
@@ -18,12 +19,23 @@ func Select(msg interface{}) (interface{},error){
 	m,ok := msg.(example.Para)
 
 	if !ok{
-		return nil,nil
+		return nil,errors.New("system error")
 	}
 	
 	fmt.Println(m)
 
-	return nil,nil
+	dao := ds.New("mongodb")
+	dao.Initialize("127.0.0.1::test:test:id")
+	
+	result := make([]example.Para,1,1)
+	err := dao.Select(m.GetId(),result)
+	if err != nil{
+		return nil,err
+	}
+
+	fmt.Println(result)
+
+	return result,nil
 }
 
 func CheckError(err error){

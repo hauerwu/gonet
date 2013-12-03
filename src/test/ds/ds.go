@@ -13,12 +13,12 @@ type DAO interface{
 	Insert(value interface{}) error
 }
 
-func New(name string) *DAO{
-	var d *DAO
+func New(name string) DAO{
+	var d DAO
 
 	switch name{
 	case "mongodb":
-		d = mongodb.New()
+		d = *mongodb.New()
 	default:
 		d = nil
 	}

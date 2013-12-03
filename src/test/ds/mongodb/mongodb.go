@@ -40,7 +40,7 @@ func (d *DAO)connect() error{
 	return nil
 }
 
-func (d *DAO)Initialize(url string) error{
+func (d DAO)Initialize(url string) error{
 	strs := strings.Split(url,":")
 	if len(strs) < 5{
 		return errors.New("can't parse ulr,try like this: 127.0.0.1:80:test:peple:key")
@@ -57,11 +57,11 @@ func (d *DAO)Initialize(url string) error{
 	return err
 }
 
-func (d *DAO)Finalize(){
+func (d DAO)Finalize(){
 	d.session.Close()
 }
 
-func (d *DAO)Select(key interface{},result interface{}) (error){
+func (d DAO)Select(key interface{},result interface{}) (error){
 	if d.session == nil{
 		return errors.New("session invalid,please reconnect!")
 	}
@@ -71,15 +71,15 @@ func (d *DAO)Select(key interface{},result interface{}) (error){
 	return err
 }
 
-func (d *DAO)Update(key interface{},value interface{}) (error){
+func (d DAO)Update(key interface{},value interface{}) (error){
 	return nil
 }
 
-func (d *DAO)Delete(key interface{}) (error){
+func (d DAO)Delete(key interface{}) (error){
 	return nil
 }
 
-func (d *DAO)Insert(value interface{}) (error){
+func (d DAO)Insert(value interface{}) (error){
 	return nil
 }
 
