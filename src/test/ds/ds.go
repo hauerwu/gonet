@@ -18,7 +18,7 @@ func New(name string) DAO{
 
 	switch name{
 	case "mongodb":
-		d = *mongodb.New()
+		d = mongodb.New()
 	default:
 		d = nil
 	}

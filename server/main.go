@@ -15,6 +15,11 @@ import (
 	"code.google.com/p/goprotobuf/proto"
 )
 
+type temp struct{
+		Id int32
+		Name string
+}
+
 func Select(msg interface{}) (interface{},error){
 	m,ok := msg.(example.Para)
 
@@ -25,17 +30,99 @@ func Select(msg interface{}) (interface{},error){
 	fmt.Println(m)
 
 	dao := ds.New("mongodb")
-	dao.Initialize("127.0.0.1::test:test:id")
+	if dao == nil{
+		fmt.Printf("can't new a %s dao\n","mongodb")
+		os.Exit(1)
+	}
+	err := dao.Initialize("127.0.0.1::test:test:id")
+	CheckError(err)
 	
-	result := make([]example.Para,1,1)
-	err := dao.Select(m.GetId(),result)
+	result := make([]example.Para,3,3)
+	err = dao.Select(m.GetId(),&result)
 	if err != nil{
+		fmt.Println(err)
 		return nil,err
 	}
 
-	fmt.Println(result)
+	for _,r := range result{
+		fmt.Printf("%d %s\n",r.GetId(),r.GetName())
+	}
+
+	dao.Finalize()
 
 	return result,nil
+}
+
+func Update(msg interface{}) (interface{},error){
+	m,ok := msg.(example.Para)
+
+	if !ok{
+		return nil,errors.New("system error")
+	}
+	
+	fmt.Println(m)
+
+	dao := ds.New("mongodb")
+	if dao == nil{
+		fmt.Printf("can't new a %s dao\n","mongodb")
+		os.Exit(1)
+	}
+	err := dao.Initialize("127.0.0.1::test:test:id")
+	CheckError(err)
+	
+	err = dao.Update(m.GetId(),temp{Id:m.GetId(),Name:m.GetName()})
+	CheckError(err)
+	dao.Finalize()
+
+	return nil,err
+}
+
+func Insert(msg interface{}) (interface{},error){
+	m,ok := msg.(example.Para)
+
+	if !ok{
+		return nil,errors.New("system error")
+	}
+	
+	fmt.Println(m)
+
+	dao := ds.New("mongodb")
+	if dao == nil{
+		fmt.Printf("can't new a %s dao\n","mongodb")
+		os.Exit(1)
+	}
+	err := dao.Initialize("127.0.0.1::test:test:id")
+	CheckError(err)
+	err = dao.Insert(temp{Id:m.GetId(),Name:m.GetName()})
+	CheckError(err)
+	dao.Finalize()
+
+	return nil,err
+}
+
+func Delete(msg interface{}) (interface{},error){
+	m,ok := msg.(example.Para)
+
+	if !ok{
+		return nil,errors.New("system error")
+	}
+	
+	fmt.Println(m)
+
+	dao := ds.New("mongodb")
+	if dao == nil{
+		fmt.Printf("can't new a %s dao\n","mongodb")
+		os.Exit(1)
+	}
+	err := dao.Initialize("127.0.0.1::test:test:id")
+	CheckError(err)
+	
+	err = dao.Delete(m.GetId())
+	CheckError(err)
+
+	dao.Finalize()
+
+	return nil,err
 }
 
 func CheckError(err error){
@@ -86,6 +173,10 @@ func main() {
 
 	var gDispatcher = dispatcher.Instance()
 	gDispatcher.Add("select",Select)
+	gDispatcher.Add("update",Update)
+	gDispatcher.Add("insert",Insert)
+	gDispatcher.Add("delete",Delete)
+	
 
 	l.Run(Handle)
 

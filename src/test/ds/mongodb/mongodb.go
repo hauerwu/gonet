@@ -3,7 +3,7 @@ package mongodb
 import (
 	"errors"
 	"strings"
-	_ "fmt"
+	"fmt"
 	"labix.org/v2/mgo"
 	"labix.org/v2/mgo/bson"
 )
@@ -18,7 +18,7 @@ type DAO struct{
 }
 
 func New() *DAO{
-	return &DAO{}
+	return new(DAO)
 }
 
 func (d *DAO)connect() error{
@@ -32,17 +32,20 @@ func (d *DAO)connect() error{
 	}
 	d.session,err = mgo.Dial(mgo_url)
 	if err != nil{
+		fmt.Printf("[%s]: %s\n",mgo_url,err)
 		return err
 	}
 
 	d.session.SetMode(mgo.Monotonic, true)
+	fmt.Printf("connected to %s\n",mgo_url)
 
 	return nil
 }
 
-func (d DAO)Initialize(url string) error{
+func (d *DAO)Initialize(url string) error{
 	strs := strings.Split(url,":")
 	if len(strs) < 5{
+		fmt.Printf("invalid url [%s]\n",url)
 		return errors.New("can't parse ulr,try like this: 127.0.0.1:80:test:peple:key")
 	}
 
@@ -57,7 +60,7 @@ func (d DAO)Initialize(url string) error{
 	return err
 }
 
-func (d DAO)Finalize(){
+func (d *DAO)Finalize(){
 	d.session.Close()
 }
 
@@ -72,15 +75,33 @@ func (d DAO)Select(key interface{},result interface{}) (error){
 }
 
 func (d DAO)Update(key interface{},value interface{}) (error){
-	return nil
+	if d.session == nil{
+		return errors.New("session invalid,please reconnect!")
+	}
+
+	c := d.session.DB(d.db).C(d.col)
+	err := c.Update(bson.M{d.key:key},value)
+	return err
 }
 
 func (d DAO)Delete(key interface{}) (error){
-	return nil
+	if d.session == nil{
+		return errors.New("session invalid,please reconnect!")
+	}
+
+	c := d.session.DB(d.db).C(d.col)
+	err := c.Remove(bson.M{d.key:key})
+	return err
 }
 
 func (d DAO)Insert(value interface{}) (error){
-	return nil
+	if d.session == nil{
+		return errors.New("session invalid,please reconnect!")
+	}
+
+	c := d.session.DB(d.db).C(d.col)
+	err := c.Insert(value)
+	return err
 }
 
 
