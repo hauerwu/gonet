@@ -92,6 +92,28 @@ func (d DAO) Select(key interface{}, result interface{}) error {
 }
 
 func (d DAO) Update(key interface{}, value interface{}) error {
+	if d.conn == nil{
+		return errors.New("no connection to mysql!")
+	}
+
+	t := reflect.TypeOf(value)
+	v := reflect.ValueOf(value)
+
+	var s interface{}
+
+	switch t.Field(1).Type.Kind(){
+	case reflect.String:
+		s = v.Field(1).String()
+	default:
+		s = 0
+	}
+
+	fmt.Println(t.Field(1).Name,s)
+
+	//sql := fmt.Sprintf("update test set name = '%s' where id = %d")
+
+	//d.conn.Exec()
+
 	return nil
 }
 
@@ -102,5 +124,8 @@ func (d DAO) Delete(key interface{}) error {
 func (d DAO) Insert(value interface{}) error {
 	return nil
 }
+
+
+
 
 
