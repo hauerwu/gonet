@@ -7,8 +7,6 @@ import(
 
 type senderError struct{}
 
-func (e *senderError) Error() string {return "sender error"}
-
 type Sender struct{
 	Net string
 	RemoteIP string
@@ -16,13 +14,15 @@ type Sender struct{
 	Conn net.Conn
 }
 
-func NewSender(net,ip string,port int) *Sender{
+func (e *senderError) Error() string {return "sender error"}
+
+func NewSender(net,ip string,port int) *Sender {
 	s := Sender{net,ip,port,nil}
 
 	return &s
 }
 
-func (s *Sender)Connect() error{
+func (s *Sender)Connect() error {
 	addr := fmt.Sprintf("%s:%d",s.RemoteIP,s.RemotePort)
 	conn,err := net.Dial(s.Net,addr)
 
@@ -31,7 +31,7 @@ func (s *Sender)Connect() error{
 	return err
 }
 
-func (s *Sender)SendData(data []byte) error{
+func (s *Sender)SendData(data []byte) error {
 	if s.Conn == nil{
 		return &senderError{}
 	}
@@ -43,7 +43,7 @@ func (s *Sender)SendData(data []byte) error{
 	return err
 }
 
-func (s *Sender)Close(){
+func (s *Sender)Close() {
 	s.Conn.Close()
 }
 

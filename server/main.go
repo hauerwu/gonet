@@ -15,12 +15,35 @@ import (
 	"code.google.com/p/goprotobuf/proto"
 )
 
-type temp struct{
+type temp struct {
 		Id int32
 		Name string
 }
 
-func Select(msg interface{}) (interface{},error){
+var dao ds.DAO
+
+func InitDB(dao *ds.DAO) error {
+	/*
+	*dao = ds.New("mongodb")
+	if dao == nil{
+		fmt.Printf("can't new a %s dao\n","mongodb")
+		os.Exit(1)
+	}
+	err := (*dao).Initialize("127.0.0.1::test:test:id")
+	CheckError(err)
+        */
+
+	*dao = ds.New("mysql")
+	if dao == nil{
+		fmt.Printf("can't new a %s dao\n","mongodb")
+		os.Exit(1)
+	}
+	err := (*dao).Initialize("127.0.0.1:3306:hauerwu:821010:test:test:id")
+	CheckError(err)
+	return err
+}
+
+func Select(msg interface{}) (interface{},error) {
 	m,ok := msg.(example.Para)
 
 	if !ok{
@@ -28,17 +51,9 @@ func Select(msg interface{}) (interface{},error){
 	}
 	
 	fmt.Println(m)
-
-	dao := ds.New("mongodb")
-	if dao == nil{
-		fmt.Printf("can't new a %s dao\n","mongodb")
-		os.Exit(1)
-	}
-	err := dao.Initialize("127.0.0.1::test:test:id")
-	CheckError(err)
 	
 	result := make([]example.Para,3,3)
-	err = dao.Select(m.GetId(),&result)
+	err := dao.Select(m.GetId(),&result)
 	if err != nil{
 		fmt.Println(err)
 		return nil,err
@@ -48,12 +63,12 @@ func Select(msg interface{}) (interface{},error){
 		fmt.Printf("%d %s\n",r.GetId(),r.GetName())
 	}
 
-	dao.Finalize()
+	//dao.Finalize()
 
 	return result,nil
 }
 
-func Update(msg interface{}) (interface{},error){
+func Update(msg interface{}) (interface{},error) {
 	m,ok := msg.(example.Para)
 
 	if !ok{
@@ -62,22 +77,29 @@ func Update(msg interface{}) (interface{},error){
 	
 	fmt.Println(m)
 
-	dao := ds.New("mongodb")
-	if dao == nil{
-		fmt.Printf("can't new a %s dao\n","mongodb")
-		os.Exit(1)
-	}
-	err := dao.Initialize("127.0.0.1::test:test:id")
+	err := dao.Update(m.GetId(),temp{Id:m.GetId(),Name:m.GetName()})
 	CheckError(err)
-	
-	err = dao.Update(m.GetId(),temp{Id:m.GetId(),Name:m.GetName()})
-	CheckError(err)
-	dao.Finalize()
+	//dao.Finalize()
 
 	return nil,err
 }
 
-func Insert(msg interface{}) (interface{},error){
+func Insert(msg interface{}) (interface{},error) {
+	m,ok := msg.(example.Para)
+
+	if !ok{
+		return nil,errors.New("system error")
+	}
+	
+	fmt.Println(m)
+	err := dao.Insert(temp{Id:m.GetId(),Name:m.GetName()})
+	CheckError(err)
+	//dao.Finalize()
+
+	return nil,err
+}
+
+func Delete(msg interface{}) (interface{},error) {
 	m,ok := msg.(example.Para)
 
 	if !ok{
@@ -86,53 +108,22 @@ func Insert(msg interface{}) (interface{},error){
 	
 	fmt.Println(m)
 
-	dao := ds.New("mongodb")
-	if dao == nil{
-		fmt.Printf("can't new a %s dao\n","mongodb")
-		os.Exit(1)
-	}
-	err := dao.Initialize("127.0.0.1::test:test:id")
+	err := dao.Delete(m.GetId())
 	CheckError(err)
-	err = dao.Insert(temp{Id:m.GetId(),Name:m.GetName()})
-	CheckError(err)
-	dao.Finalize()
+
+	//dao.Finalize()
 
 	return nil,err
 }
 
-func Delete(msg interface{}) (interface{},error){
-	m,ok := msg.(example.Para)
-
-	if !ok{
-		return nil,errors.New("system error")
-	}
-	
-	fmt.Println(m)
-
-	dao := ds.New("mongodb")
-	if dao == nil{
-		fmt.Printf("can't new a %s dao\n","mongodb")
-		os.Exit(1)
-	}
-	err := dao.Initialize("127.0.0.1::test:test:id")
-	CheckError(err)
-	
-	err = dao.Delete(m.GetId())
-	CheckError(err)
-
-	dao.Finalize()
-
-	return nil,err
-}
-
-func CheckError(err error){
+func CheckError(err error) {
 	if err != nil{
 		fmt.Println(err)
 		os.Exit(1)
 	}
 }
 
-func Handle(buff []byte) error{
+func Handle(buff []byte) error {
 
 	//fmt.Println(buff)
 	test := example.Test{}
@@ -176,9 +167,15 @@ func main() {
 	gDispatcher.Add("update",Update)
 	gDispatcher.Add("insert",Insert)
 	gDispatcher.Add("delete",Delete)
+
+	err = InitDB(&dao)
+	CheckError(err)
+
+	fmt.Println(dao)
 	
 
 	l.Run(Handle)
+	dao.Finalize()
 
 	os.Exit(0)
 }

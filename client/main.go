@@ -10,14 +10,14 @@ import(
 )
 
 
-func CheckError(err error){
+func CheckError(err error) {
 	if err != nil{
 		fmt.Println(err)
 		os.Exit(1)
 	}
 }
 
-func main(){
+func main() {
 
 	if len(os.Args) < 5{
 		fmt.Printf("usage:%s ip port cmd id [name]\n",os.Args[0])
@@ -36,6 +36,7 @@ func main(){
 	
 	id,err = strconv.Atoi(id_str)
 	CheckError(err)
+
 	port,err = strconv.Atoi(port_str)
 	CheckError(err)
 
