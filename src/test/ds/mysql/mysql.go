@@ -6,6 +6,7 @@ import (
 	"database/sql"
 	_ "github.com/go-sql-driver/mysql"
 	"strings"
+	"reflect"
 )
 
 type DAO struct {
@@ -65,12 +66,26 @@ func (d DAO) Select(key interface{}, result interface{}) error {
 	var rows *sql.Rows
 	sql := fmt.Sprintf("select * from %s where id = %d",d.table,key)
 	rows,err = d.conn.Query(sql)
+	if err != nil{
+		fmt.Println(err)
+		return err
+	}
 
-	for rows.Next(){
-		var id int
-		var name string
-		err = rows.Scan(&id,&name)
-		fmt.Printf("id:%d name:%s\n",id,name)
+	t := reflect.ValueOf(result)
+	e := t.Elem()
+
+	e = e.Slice(0,e.Len())
+	i := 0
+	for rows.Next() && i < e.Len(){
+		j := 0
+		s := make([]interface{},0,10)
+		for j < e.Index(i).NumField(){
+			s = append(s,e.Index(i).Field(j).Addr().Interface())
+			j++
+			//fmt.Println(j)
+		}
+		err = rows.Scan(s...)
+		i++
 	}
 	
 	return err
@@ -87,3 +102,5 @@ func (d DAO) Delete(key interface{}) error {
 func (d DAO) Insert(value interface{}) error {
 	return nil
 }
+
+

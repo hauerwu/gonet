@@ -52,7 +52,7 @@ func Select(msg interface{}) (interface{},error) {
 	
 	fmt.Println(m)
 	
-	result := make([]example.Para,3,3)
+	result := make([]temp,3,3)
 	err := dao.Select(m.GetId(),&result)
 	if err != nil{
 		fmt.Println(err)
@@ -60,7 +60,7 @@ func Select(msg interface{}) (interface{},error) {
 	}
 
 	for _,r := range result{
-		fmt.Printf("%d %s\n",r.GetId(),r.GetName())
+		fmt.Printf("%d %s\n",r.Id,r.Name)
 	}
 
 	//dao.Finalize()
