@@ -7,6 +7,7 @@ import (
 	_ "github.com/go-sql-driver/mysql"
 	"strings"
 	"reflect"
+	"test/common/struct_helper"
 )
 
 type DAO struct {
@@ -19,6 +20,48 @@ type DAO struct {
 	key   string
 
 	conn *sql.DB
+}
+
+func ToUpdate(t reflect.StructField,v reflect.Value,sql *string,ex string,isfirst bool){
+	name := t.Name
+	if name == ex{
+		return
+	}
+
+	switch {
+	case t.Type.Kind() == reflect.String:
+			if isfirst{
+				*sql = fmt.Sprintf("%s %s='%s'",*sql,name,v.String())
+			}else{
+				*sql = fmt.Sprintf("%s ,%s='%s'",*sql,name,v.String())
+			}
+	case t.Type.Kind() >= reflect.Int && t.Type.Kind() <= reflect.Uint64: 
+		if isfirst{
+			*sql = fmt.Sprintf("%s %s=%d",*sql,name,v.Int())
+		}else{
+			*sql = fmt.Sprintf("%s ,%s=%d",*sql,name,v.Int())
+		}
+	default:
+	}
+}
+
+func ToInsert(t reflect.StructField,v reflect.Value,sql *string,ex string,isfirst bool){
+	
+	switch {
+	case t.Type.Kind() ==  reflect.String:
+			if isfirst{
+				*sql = fmt.Sprintf("%s'%s'",*sql,v.String())
+			}else{
+				*sql = fmt.Sprintf("%s,'%s'",*sql,v.String())
+			}
+	case t.Type.Kind() >= reflect.Int && t.Type.Kind() <= reflect.Uint64: 	
+			if isfirst{
+				*sql = fmt.Sprintf("%s%d",*sql,v.Int())
+			}else{
+				*sql = fmt.Sprintf("%s,%d",*sql,v.Int())
+			}
+	default:
+	}
 }
 
 func New() *DAO {
@@ -96,33 +139,47 @@ func (d DAO) Update(key interface{}, value interface{}) error {
 		return errors.New("no connection to mysql!")
 	}
 
-	t := reflect.TypeOf(value)
-	v := reflect.ValueOf(value)
+	var sql string = fmt.Sprintf("update %s set ",d.table)
 
-	var s interface{}
+	struct_helper.ParseSimpleStruct(value,ToUpdate,&sql,d.key)
+	
+	sql = fmt.Sprintf("%s where %s = %d",sql,d.key,key)
 
-	switch t.Field(1).Type.Kind(){
-	case reflect.String:
-		s = v.Field(1).String()
-	default:
-		s = 0
-	}
+	fmt.Println(sql)
 
-	fmt.Println(t.Field(1).Name,s)
+	sql = fmt.Sprintf(sql)
 
-	//sql := fmt.Sprintf("update test set name = '%s' where id = %d")
+	_,err := d.conn.Exec(sql)
 
-	//d.conn.Exec()
-
-	return nil
+	return err
 }
 
 func (d DAO) Delete(key interface{}) error {
-	return nil
+	if d.conn == nil{
+		return errors.New("no connection to mysql!")
+	}
+
+	sql := fmt.Sprintf("delete from %s where %s = %d",d.table,d.key,key)
+	fmt.Println(sql)
+	_,err := d.conn.Exec(sql)
+	
+	return err
 }
 
 func (d DAO) Insert(value interface{}) error {
-	return nil
+	if d.conn == nil{
+		return errors.New("no connection to mysql!")
+	}
+
+	sql := fmt.Sprintf("insert into %s values (",d.table)
+	
+	struct_helper.ParseSimpleStruct(value,ToInsert,&sql,d.key)
+	sql += ")"
+
+	fmt.Println(sql)
+	_,err := d.conn.Exec(sql)
+
+	return err
 }
 
 

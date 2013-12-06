@@ -15,7 +15,8 @@ func GetSqlResult(d interface{}) {
 	t := reflect.ValueOf(d)
 	e := t.Elem()
 
-	e = e.Slice(0,e.Len())
+	e = e.Slice(0,e.L
+en())
 	
 	i := 0
 	for i < e.Len(){

@@ -74,8 +74,6 @@ func Update(msg interface{}) (interface{},error) {
 	if !ok{
 		return nil,errors.New("system error")
 	}
-	
-	fmt.Println(m)
 
 	err := dao.Update(m.GetId(),temp{Id:m.GetId(),Name:m.GetName()})
 	CheckError(err)
@@ -139,7 +137,8 @@ func Handle(buff []byte) error {
 	if f == nil{
 		fmt.Printf("invalid cmd %s\n",test.GetHead().GetCmd())
 	}else{
-		f(*test.GetPara())
+		_,e = f(*test.GetPara())
+		CheckError(e)
 	}
 	
 
@@ -170,10 +169,7 @@ func main() {
 
 	err = InitDB(&dao)
 	CheckError(err)
-
-	fmt.Println(dao)
 	
-
 	l.Run(Handle)
 	dao.Finalize()
 
